@@ -7,9 +7,13 @@ namespace EF.Solutions.Business.Interfaces.Infraestructura;
 /// </summary>
 public interface IDatabaseHealthService
 {
+    #region Verificar conectividad
     /// <summary>
     /// Autor: Elmer Fuentes.
     /// Comprueba la conexión sin divulgar la cadena, el usuario ni el servidor.
     /// </summary>
+    /// <param name="cancellationToken">Cancelación de la petición HTTP.</param>
+    /// <returns>Verdadero si la consulta responde y falso ante un fallo de MySQL.</returns>
     Task<bool> VerificarAsync(CancellationToken cancellationToken);
+    #endregion
 }
