@@ -13,11 +13,13 @@ public sealed class MySqlDatabaseHealthService : IDatabaseHealthService
 {
     private readonly DatabaseSettings _settings;
 
+    #region Inicializar diagnóstico
     /// <summary>
     /// Autor: Elmer Fuentes.
     /// Inicializa el diagnóstico con parámetros obtenidos del entorno del servidor.
     /// </summary>
     public MySqlDatabaseHealthService(DatabaseSettings settings) => _settings = settings;
+    #endregion
 
     #region Diagnóstico de conexión
     /// <inheritdoc />
@@ -37,11 +39,18 @@ public sealed class MySqlDatabaseHealthService : IDatabaseHealthService
         };
         if (!string.IsNullOrWhiteSpace(_settings.SslCa))
             connString.SslCa = _settings.SslCa;
-        await using var connection = new MySqlConnection(connString.ConnectionString);
-        await connection.OpenAsync(cancellationToken);
-        await using var command = new MySqlCommand("SELECT 1", connection);
-        var result = await command.ExecuteScalarAsync(cancellationToken);
-        return Convert.ToInt32(result) == 1;
+        try
+        {
+            await using var connection = new MySqlConnection(connString.ConnectionString);
+            await connection.OpenAsync(cancellationToken);
+            await using var command = new MySqlCommand("SELECT 1", connection);
+            var result = await command.ExecuteScalarAsync(cancellationToken);
+            return Convert.ToInt32(result) == 1;
+        }
+        catch (MySqlException) when (!cancellationToken.IsCancellationRequested)
+        {
+            return false;
+        }
     }
     #endregion
 }
