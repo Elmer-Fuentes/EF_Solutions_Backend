@@ -1,0 +1,18 @@
+# Configuración privada
+.env
+.env.*
+!.env.example
+!.env.*.example
+appsettings.Local.json
+appsettings.Production.json
+*.pfx
+*.pem
+*.key
+secrets/
+
+# Compilación y herramientas locales
+bin/
+obj/
+TestResults/
+.vs/
+.idea/
