@@ -1,6 +1,11 @@
 using EF.Solutions.Business.Configuracion;
 using EF.Solutions.Business.Interfaces.Infraestructura;
 using EF.Solutions.Data.Connections.MySql;
+using EF.Solutions.Business.Interfaces.Autenticacion;
+using EF.Solutions.Business.Services.Autenticacion;
+using EF.Solutions.Data.Repositories.Autenticacion;
+using Microsoft.AspNetCore.RateLimiting;
+using System.Threading.RateLimiting;
 
 // Autor: Elmer Fuentes.
 // Arranque de API HTTP. Web configura dependencias; Business define contratos y Data los implementa.
@@ -19,6 +24,15 @@ if (string.Equals(environmentName, "Development", StringComparison.OrdinalIgnore
 
 var builder = WebApplication.CreateBuilder(args);
 builder.Services.AddControllers();
+builder.Services.AddRateLimiter(options =>
+{
+    options.RejectionStatusCode = StatusCodes.Status429TooManyRequests;
+    options.AddPolicy("registro", context => RateLimitPartition.GetFixedWindowLimiter(
+        context.Connection.RemoteIpAddress?.ToString() ?? "desconocida",
+        _ => new FixedWindowRateLimiterOptions { PermitLimit = 10, Window = TimeSpan.FromMinutes(1) }));
+});
+builder.Services.AddScoped<IRegistroRepositorio, RegistroMySqlRepositorio>();
+builder.Services.AddScoped<RegistroService>();
 
 #region Configuración de base de datos
 var cfg = builder.Configuration;
@@ -50,6 +64,7 @@ builder.Services.AddScoped<IDatabaseHealthService, MySqlDatabaseHealthService>()
 #endregion
 
 var app = builder.Build();
+app.UseRateLimiter();
 app.MapControllers();
 app.MapGet("/health", () => Results.Ok(new { status = "ok" }));
 
