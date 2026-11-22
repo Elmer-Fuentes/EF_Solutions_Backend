@@ -14,11 +14,13 @@ Configuraciones de ejemplo: `Configuracion/env/`. El `.env` de trabajo es `EF.So
 
 Pruebas futuras: `Tests/UnitTests`, `Tests/IntegrationTests`, `Tests/ArchitectureTests`.
 
-Para ejecutar:
+Para ejecutar en desarrollo con MySQL local activo y `EF.Solutions.Web/.env` configurado, abre PowerShell:
 
 ```powershell
-dotnet restore .\EF.Solutions.slnx
-dotnet build .\EF.Solutions.slnx
+Set-Location 'C:\DEV\Leonel\EF_Solutions\Backend\EF.Solutions.Web'
+dotnet run
 ```
 
-No afirmamos que compile hasta ejecutarlo en ambiente con SDK .NET 10.
+En otra terminal, consulta `http://localhost:5257/health` para verificar la API y `http://localhost:5257/health/database` para confirmar la conexión a `EF_DEV`. Detén la API con Ctrl+C en su terminal.
+
+En Development, abre [Swagger UI](http://localhost:5257/swagger/) para elegir una operación y ejecutarla con **Try it out** y **Execute**. El contrato OpenAPI está en `/swagger/v1/swagger.json`.
