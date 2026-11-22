@@ -12,6 +12,14 @@ Referencias: `Web -> Business`, `Web -> Data` para registrar dependencias; `Data
 
 Configuraciones de ejemplo: `Configuracion/env/`. El `.env` de trabajo es `EF.Solutions.Web/.env` (no versionar).
 
+- **Development:** usa `.env.local.example` o `EF.Solutions.Web/.env.example` como referencia. `EF_CONFIG_FILE` permite señalar otro archivo privado de DEV. Las variables del proceso tienen prioridad.
+- **QA:** inicia con `DOTNET_ENVIRONMENT=Staging` y variables protegidas independientes.
+- **Producción:** usa las claves de `.env.production.example` como referencia para Railway. El servicio recibe las variables protegidas y conecta con TLS `VerifyFull`. Los perfiles externos requieren bases, identidades y credenciales independientes.
+
+### MySQL DEV opcional con Docker
+
+Desde `Backend/`, define `EF_MYSQL_ROOT_PASSWORD` en tu sesión privada y ejecuta `docker compose -f Configuracion/compose.mysql-dev.yml up -d`. La instancia usa un volumen propio y escucha en `127.0.0.1:3307`. Aprovisiona `ef_dev` antes de conectar la API y configura su puerto en el archivo privado. Para detener la instancia y conservar sus datos, usa `docker compose -f Configuracion/compose.mysql-dev.yml down`.
+
 Pruebas futuras: `Tests/UnitTests`, `Tests/IntegrationTests`, `Tests/ArchitectureTests`.
 
 Para ejecutar en desarrollo con MySQL local activo y `EF.Solutions.Web/.env` configurado, abre PowerShell:
