@@ -1,0 +1,12 @@
+<Project Sdk="Microsoft.NET.Sdk.Web">
+  <PropertyGroup>
+    <TargetFramework>net10.0</TargetFramework>
+    <ImplicitUsings>enable</ImplicitUsings>
+    <Nullable>enable</Nullable>
+  </PropertyGroup>
+  <ItemGroup>
+    <ProjectReference Include="../EF.Solutions.Business/EF.Solutions.Business.csproj" />
+    <ProjectReference Include="../EF.Solutions.Data/EF.Solutions.Data.csproj" />
+    <PackageReference Include="DotNetEnv" Version="3.2.0" />
+  </ItemGroup>
+</Project>
