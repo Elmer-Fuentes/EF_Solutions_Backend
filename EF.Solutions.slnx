@@ -1,0 +1,5 @@
+<Solution>
+  <Project Path="EF.Solutions.Web/EF.Solutions.Web.csproj" />
+  <Project Path="EF.Solutions.Business/EF.Solutions.Business.csproj" />
+  <Project Path="EF.Solutions.Data/EF.Solutions.Data.csproj" />
+</Solution>
