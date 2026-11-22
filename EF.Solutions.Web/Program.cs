@@ -6,22 +6,11 @@ using Microsoft.OpenApi;
 // Autor: Elmer Fuentes.
 // Arranque de API HTTP. Web configura dependencias; Business define contratos y Data los implementa.
 // .env es exclusivo de desarrollo local. En Railway se usan variables protegidas del servicio.
-var environmentName = Environment.GetEnvironmentVariable("ASPNETCORE_ENVIRONMENT");
-if (string.Equals(environmentName, "Development", StringComparison.OrdinalIgnoreCase))
-{
-    var customPath = Environment.GetEnvironmentVariable("EF_CONFIG_FILE");
-    var envPath = string.IsNullOrWhiteSpace(customPath)
-        ? Path.Combine(Directory.GetCurrentDirectory(), ".env")
-        : Path.GetFullPath(customPath);
-    if (!File.Exists(envPath) && !string.IsNullOrWhiteSpace(customPath))
-        throw new FileNotFoundException("No se encontró el archivo de configuración EF_CONFIG_FILE.");
-    if (File.Exists(envPath)) DotNetEnv.Env.NoClobber().Load(envPath);
-}
-
 var builder = WebApplication.CreateBuilder(args);
 builder.Services.AddControllers();
 if (builder.Environment.IsDevelopment())
 {
+    CargarConfiguracionLocal(builder);
     builder.Services.AddEndpointsApiExplorer();
     builder.Services.AddSwaggerGen(options =>
         options.SwaggerDoc("v1", new OpenApiInfo { Title = "EF Solutions API", Version = "v1" }));
@@ -84,3 +73,40 @@ if (app.Environment.IsDevelopment())
     }).Produces(StatusCodes.Status200OK).Produces(StatusCodes.Status503ServiceUnavailable);
 }
 app.Run();
+
+#region Cargar configuración local
+/// <summary>
+/// Autor: Elmer Fuentes. Completa la configuración MySQL de desarrollo desde un archivo privado.
+/// Los valores ya configurados en el host tienen prioridad.
+/// </summary>
+/// <param name="hostBuilder">Host de desarrollo que registra DatabaseSettings.</param>
+/// <exception cref="InvalidOperationException">La ruta personalizada falta o el archivo es ilegible.</exception>
+static void CargarConfiguracionLocal(WebApplicationBuilder hostBuilder)
+{
+    var customPath = hostBuilder.Configuration["EF_CONFIG_FILE"];
+    var defaultPath = string.IsNullOrWhiteSpace(customPath);
+    try
+    {
+        var path = defaultPath
+            ? Path.Combine(hostBuilder.Environment.ContentRootPath, ".env")
+            : Path.GetFullPath(customPath!);
+        if (defaultPath && !File.Exists(path))
+            return;
+
+        foreach (var (name, value) in DotNetEnv.Env.NoEnvVars().Load(path))
+        {
+            if (!name.StartsWith("EF_DATABASE__", StringComparison.OrdinalIgnoreCase))
+                continue;
+
+            var key = name.Replace("__", ":");
+            if (hostBuilder.Configuration[key] is null)
+                hostBuilder.Configuration[key] = value;
+        }
+    }
+    catch (Exception)
+    {
+        // El error del lector puede incluir contenido del archivo.
+        throw new InvalidOperationException("No se pudo cargar la configuración privada de MySQL DEV.");
+    }
+}
+#endregion
